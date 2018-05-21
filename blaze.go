@@ -99,6 +99,21 @@ func Loop(ctx context.Context, listener MessageListener, uid, sid, key string) e
 	}
 }
 
+func SendGeneralMessage(ctx context.Context, mc *MessageContext, msg MessageView, category, content string) error {
+	params := map[string]interface{}{
+		"conversation_id": msg.ConversationId,
+		"recipient_id":    msg.UserId,
+		"message_id":      NewV4().String(),
+		"category":        category,
+		"data":            base64.StdEncoding.EncodeToString([]byte(content)),
+	}
+	if err := writeMessageAndWait(ctx, mc, "CREATE_MESSAGE", params); err != nil {
+		fmt.Println(err)
+		return BlazeServerError(ctx, err)
+	}
+	return nil
+}
+
 func SendPlainText(ctx context.Context, mc *MessageContext, msg MessageView, btns string) error {
 	params := map[string]interface{}{
 		"conversation_id": msg.ConversationId,
